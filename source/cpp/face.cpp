@@ -67,7 +67,7 @@ cg::tri_face::tri_face(vertex* A, vertex* B, vertex* C, const size_t& id = 0)
 	//IF IT IS COLINEAR THEN IT IS NOT A VALID SURFACE. WE NEED TO STOP THAT.
 	auto lhs = (A->GetYCoord() - B->GetYCoord()) / (A->GetXCoord() - B->GetXCoord());
 	auto rhs = (A->GetYCoord() - C->GetYCoord()) / (A->GetXCoord() - C->GetXCoord());
-	if (lhs == rhs || abs(lhs - rhs) < 1e-12)
+	if (fabs(lhs - rhs) < 1e-12)
 	{
 		std::cout << "The points of the triangles are colinear! Aborting..." << std::endl;
 		exit(1);
