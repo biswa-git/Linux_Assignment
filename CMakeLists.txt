@@ -14,10 +14,7 @@ source/cpp/vertex.cpp
 )
 
 target_link_libraries(CGA
-#release
-#   ${CMAKE_SOURCE_DIR}/source/third_party/boost/stage/lib/libboost_filesystem-vc142-mt-x64-1_72.lib
-#debug
-    ${CMAKE_SOURCE_DIR}/source/third_party/boost/stage/lib/libboost_filesystem-vc142-mt-gd-x64-1_72.lib
+   ${CMAKE_SOURCE_DIR}/source/third_party/boost/stage/lib/libboost_filesystem.a
 )
 
 install(TARGETS CGA DESTINATION ${CMAKE_SOURCE_DIR}/exe)
