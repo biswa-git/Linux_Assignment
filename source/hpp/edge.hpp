@@ -9,7 +9,6 @@ namespace cg
 	class edge
 	{
 	public:
-		friend class edge;
 		static edge* New(vertex*, vertex*);
 		~edge();
 		edge(edge const&) = delete;
