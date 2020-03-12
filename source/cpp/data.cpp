@@ -6,6 +6,7 @@ cg::data::data() :isDataRead(false), isBoundaryCalculated(false)
 
 cg::data::~data()
 {
+	/*
 	if (!faceList.empty())
 	{
 		for (auto it = faceList.begin(); it != faceList.end(); ++it)
@@ -20,6 +21,7 @@ cg::data::~data()
 			FREE_OBJ_MACRO(*it);
 		}
 	}
+	*/
 
 }
 
