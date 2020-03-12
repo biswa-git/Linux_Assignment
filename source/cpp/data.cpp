@@ -22,7 +22,6 @@ cg::data::~data()
 		}
 	}
 	*/
-
 }
 
 std::vector<cg::vertex*>& cg::data::GetVertexList()
