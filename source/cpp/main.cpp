@@ -25,6 +25,27 @@ int main()
 	std::cout << "-------------------------------------------------" << std::endl;
 	//one can access the edges of a bundary/loop also
 
+	
+	//writting the data in .obj format // working with Open3Mod viewer
+	std::ofstream file("../output/openedge.obj");
+	auto vertexList = triMesh.GetVertexList();
+	auto faceList = triMesh.GetFaceList();
+	for (auto it = vertexList.begin(); it != vertexList.end(); ++it)
+	{
+		file << "v " << (*it)->GetXCoord() << " " << (*it)->GetYCoord() << " " << (*it)->GetZCoord() << std::endl;
+
+	}
+	for (auto it_be = boundaryEdge.begin(); it_be != boundaryEdge.end(); ++it_be)
+	{
+		for (auto it_be_s = (*it_be).begin(); it_be_s != (*it_be).end(); ++it_be_s)
+		{
+			file << "l " << (*it_be_s)->GetStart()->GetId() << " " << (*it_be_s)->GetEnd()->GetId() << std::endl;
+		}
+
+	}
+	
+	
+	
 	//BFS ALGO FOR MINIMUM DISTANCE PATH
 	auto connectingTrias = triMesh.Distance(1, 14);
 
