@@ -214,10 +214,11 @@ std::vector<cg::face*> cg::data::Distance(const size_t& a, const size_t& b)
 	}
 	
 	auto presentFace = B;
-	while (presentFace!=nullptr)
+	distanceVector.push_back(presentFace);
+	while (presentFace!=A)
 	{
-		distanceVector.push_back(presentFace);
 		presentFace = presentFace->GetPrevious();
+		distanceVector.push_back(presentFace);
 	}
 	//RESETING DISTANCE
 	for (auto it = faceList.begin(); it != faceList.end(); ++it)
