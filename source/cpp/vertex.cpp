@@ -2,7 +2,7 @@
 
 size_t cg::vertex::count = 0;
 
-cg::vertex::vertex(const double& x, const double& y, const double& z, const size_t& id):id(id),xCoord(x), yCoord(y), zCoord(z)
+cg::vertex::vertex(const double& x, const double& y, const double& z, const size_t& id):id(id),xCoord(x), yCoord(y), zCoord(z),distance(SIZE_MAX)
 {
 }
 
@@ -57,4 +57,25 @@ double cg::CrossProductByVertex2D(vertex* A, vertex* B, vertex* C)
 {
 	return (B->GetXCoord() - A->GetXCoord()) * (C->GetYCoord() - B->GetYCoord()) -
 		   (B->GetYCoord() - A->GetYCoord()) * (C->GetXCoord() - B->GetXCoord());
+}
+
+
+void cg::vertex::SetPrevious(cg::vertex* P)
+{
+    previous = P;
+}
+
+cg::vertex* cg::vertex::GetPrevious()
+{
+    return previous;
+}
+
+void cg::vertex::SetDistance(const size_t& D)
+{
+    distance = D;
+}
+
+size_t cg::vertex::GetDistance()
+{
+    return distance;
 }

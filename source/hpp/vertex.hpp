@@ -18,7 +18,10 @@ namespace cg
 		double GetZCoord() const;
 		std::set<edge*>& GetAssociatedEdge();
 		void Print() const;
-
+        void SetPrevious(vertex*);
+        vertex* GetPrevious();
+        void SetDistance(const size_t&);
+        size_t GetDistance();
 	private:
 		vertex(const double& = 0.0, const double& = 0.0, const double& = 0.0, const size_t & = 0);
 
@@ -26,6 +29,8 @@ namespace cg
 		size_t id;
 		double xCoord, yCoord, zCoord;
 		std::set<edge*> AssociatedEdge;
+        vertex* previous;
+        size_t distance;
 	};
 
 	double CrossProductByVertex2D(vertex*, vertex*, vertex*);

@@ -18,7 +18,7 @@ namespace cg
 		bool Read(const std::string&);
 		bool Write(const std::string&);
 		void CalculateBoundaryInfo();
-		std::vector<face*> Distance(const size_t&, const size_t&);
+        std::vector<vertex*> Distance(const size_t&, const size_t&);
 	private:
 		bool isDataRead, isBoundaryCalculated;
 		std::vector<vertex*> vertexList;

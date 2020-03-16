@@ -2,7 +2,7 @@
 
 size_t cg::face::count = 0;
 
-cg::face::face() :area(0.0), isOrphanedEdgeRemoveFlag{ true }, previous(nullptr),distance(99999999999),id(0) //NOT SURE ABOUT GCC INF
+cg::face::face() :area(0.0), isOrphanedEdgeRemoveFlag{ true }, previous(nullptr),distance(SIZE_MAX),id(0) //NOT SURE ABOUT GCC INF
 {
 }
 
@@ -35,9 +35,9 @@ size_t cg::face::GetDistance()
 	return distance;
 }
 
-cg::tri_face* cg::tri_face::New(vertex* A, vertex* B, vertex* C, const size_t& id)
+cg::tri_face* cg::tri_face::New(vertex* A, vertex* B, vertex* C, const size_t& id_)
 {
-	return new tri_face(A,B,C,id);
+    return new tri_face(A,B,C,id_);
 }
 
 cg::tri_face::~tri_face()
@@ -60,9 +60,9 @@ double cg::tri_face::GetArea()
 	return area;
 }
 
-cg::tri_face::tri_face(vertex* A, vertex* B, vertex* C, const size_t& id = 0)
+cg::tri_face::tri_face(vertex* A, vertex* B, vertex* C, const size_t& id_ = 0)
 {
-	this->id = id;
+    id = id_;
 	halfEdge.resize(3, nullptr);
 	//IF IT IS COLINEAR THEN IT IS NOT A VALID SURFACE. WE NEED TO STOP THAT.
 	auto lhs = (A->GetYCoord() - B->GetYCoord()) / (A->GetXCoord() - B->GetXCoord());
@@ -70,7 +70,7 @@ cg::tri_face::tri_face(vertex* A, vertex* B, vertex* C, const size_t& id = 0)
 	if (fabs(lhs - rhs) < 1e-12)
 	{
 		std::cout << "The points of the triangles are colinear! Aborting..." << std::endl;
-		exit(1);
+        exit(EXIT_FAILURE);
 	}
 
 	//	FIRST WE CREATE THREE EDGE / CHECK EXISTANCE
@@ -129,7 +129,7 @@ void cg::tri_face::CalculateArea()
 {
 	vector firstEdgeVector(halfEdge[0]->GetStart(), halfEdge[0]->GetEnd());
 	vector secondEdgeVector(halfEdge[1]->GetStart(), halfEdge[1]->GetEnd());
-	area = 0.5*abs(firstEdgeVector ^ secondEdgeVector);
+    area = 0.5*fabs(firstEdgeVector ^ secondEdgeVector);
 }
 
 std::vector<cg::half_edge*>& cg::tri_face::GetHalfEdgeVector()

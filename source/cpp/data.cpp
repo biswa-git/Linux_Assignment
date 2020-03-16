@@ -6,6 +6,7 @@ cg::data::data() :isDataRead(false), isBoundaryCalculated(false)
 
 cg::data::~data()
 {
+	/*
 	if (!faceList.empty())
 	{
 		for (auto it = faceList.begin(); it != faceList.end(); ++it)
@@ -20,7 +21,7 @@ cg::data::~data()
 			FREE_OBJ_MACRO(*it);
 		}
 	}
-
+	*/
 }
 
 std::vector<cg::vertex*>& cg::data::GetVertexList()
@@ -40,50 +41,74 @@ std::list<std::set<cg::edge*>>& cg::data::GetBoundaryList()
 
 bool cg::data::Read(const std::string& fileName)
 {
-	vertex* vertexData = NULL;
-	face* faceData = NULL;
+    std::ifstream fileIn(fileName.c_str());
+    if (!fileIn.is_open()) return isDataRead;
 
-	std::ifstream fileIn(fileName.c_str());
-	if (!fileIn.is_open()) return isDataRead;
+    typedef boost::char_separator<char> Separator;
+    typedef boost::tokenizer<boost::char_separator<char>> Tokenizer;
+    std::string line;
 
-	typedef boost::char_separator<char> Separator;
-	typedef boost::tokenizer<boost::char_separator<char>> Tokenizer;
-	std::string line;
+    double coord[3]{ 0,0,0 };
+    size_t vertexId[3]{ 0,0,0 };
+    size_t vertNum = 0, faceNum = 0;
 
-	double coord[3];
-	size_t vertexId[3];
-	size_t vertNum = 0, faceNum = 0;
+    while (getline(fileIn, line))
+    {
+        Separator sep{ " /" };
+        Tokenizer tok(line, sep);
+        std::vector<double> rowData;
+        auto it = tok.begin();
+        auto identifier = *it;
 
-	while (getline(fileIn, line))
-	{
-		Separator sep{ " " };
-		Tokenizer tok(line, sep);
-		std::vector<double> rowData;
-		auto it = tok.begin();
-		auto identifier = *it;
+        if (identifier == "v")
+        {
+            ++it;
+            std::vector<std::string> tempStorage;
+            for (; it != tok.end(); ++it)
+            {
+                tempStorage.emplace_back(*it);
+            }
 
-		if (identifier == "v")
-		{
-			for (auto i = 0; i < 3; ++i)
-			{
-				coord[i] = std::stod(*(++it));
-			}
-			++vertNum;
-			vertexData = vertex::New(coord[0], coord[1], coord[2], vertNum);
-			vertexList.push_back(vertexData); vertexData = NULL;
-		}
-		else if (identifier == "f")
-		{
-			for (auto i = 0; i < 3; ++i)
-			{
-				vertexId[i] = std::stoi(*(++it)) - size_t(1);
-			}
-			++faceNum;
-			faceData = tri_face::New(vertexList[vertexId[0]], vertexList[vertexId[1]], vertexList[vertexId[2]], faceNum);
-			faceList.push_back(faceData); faceData = NULL;
-		}
-	}
-	return true;
+            for (size_t i = 0; i < 3; ++i)
+            {
+                coord[i] = std::stod(tempStorage[i]);
+            }
+
+            ++vertNum;
+            vertexList.push_back(vertex::New(coord[0], coord[1], coord[2], vertNum));
+        }
+        else if (identifier == "f")
+        {
+            ++it;
+            std::vector<std::string> tempStorage;
+            for (; it != tok.end(); ++it)
+            {
+                tempStorage.emplace_back(*it);
+            }
+            if (tempStorage.size() == 9)
+            {
+                vertexId[0] = static_cast<size_t>(std::stoi(tempStorage[0]));
+                vertexId[1] = static_cast<size_t>(std::stoi(tempStorage[3]));
+                vertexId[2] = static_cast<size_t>(std::stoi(tempStorage[6]));
+            }
+            else if (tempStorage.size() == 6)
+            {
+                vertexId[0] = static_cast<size_t>(std::stoi(tempStorage[0]));
+                vertexId[1] = static_cast<size_t>(std::stoi(tempStorage[2]));
+                vertexId[2] = static_cast<size_t>(std::stoi(tempStorage[4]));
+            }
+            else if (tempStorage.size() == 3)
+            {
+                vertexId[0] = static_cast<size_t>(std::stoi(tempStorage[0]));
+                vertexId[1] = static_cast<size_t>(std::stoi(tempStorage[1]));
+                vertexId[2] = static_cast<size_t>(std::stoi(tempStorage[2]));
+            }
+            ++faceNum;
+            auto newFace = tri_face::New(vertexList[vertexId[0]-1], vertexList[vertexId[1]-1], vertexList[vertexId[2]-1], faceNum);
+            faceList.push_back(newFace);
+        }
+    }
+    return true;
 }
 
 bool cg::data::Write(const std::string& fileName)
@@ -168,61 +193,64 @@ void cg::data::CalculateBoundaryInfo()
 }
 
 //IT IS BASED ON BFS ALGO
-std::vector<cg::face*> cg::data::Distance(const size_t& a, const size_t& b)
+std::vector<cg::vertex*> cg::data::Distance(const size_t& a, const size_t& b)
 {
-	face* A = faceList[a - 1];
-	face* B = faceList[b - 1];
-	std::vector<cg::face*> distanceVector; //stores and return inbetween connecting faces
+    vertex* A = vertexList[a - 1];
+    vertex* B = vertexList[b - 1];
+    std::vector<cg::vertex*> distanceVector; //stores and return inbetween connecting faces
 
-	A->SetDistance(size_t(0));
-	std::queue<face*> crawlQueue;
+    A->SetDistance(static_cast<size_t>(0));
+    std::queue<vertex*> crawlQueue;
 	crawlQueue.push(A);
 
-	auto crawlFlag = true;
+    auto crawlFlag = true;
+    if(A==B) crawlFlag = false;
 	while (crawlFlag)
 	{
 		auto front = crawlQueue.front();
 		crawlQueue.pop();
-		auto halfEdgeVector = front->GetHalfEdgeVector();
-		for (auto it_he = halfEdgeVector.begin(); it_he != halfEdgeVector.end(); ++it_he)
+        auto edgeSet = front->GetAssociatedEdge();
+        for (auto it_e = edgeSet.begin(); it_e != edgeSet.end(); ++it_e)
 		{
-			auto parentEdge = (*it_he)->GetParentEdge();
-			face* neighbourFace = nullptr;
-			if (parentEdge->GetHalfEdge(0) != (*it_he))
+
+            vertex* neighbourVertex = nullptr;
+            auto start = (*it_e)->GetStart();
+            auto end = (*it_e)->GetEnd();
+
+            if (front==start)
 			{
-				neighbourFace = parentEdge->GetHalfEdge(0)->GetFace();
+                neighbourVertex = end;
 			}
-			else
+            else
 			{
-				neighbourFace = parentEdge->GetHalfEdge(1)->GetFace();
-			}
-			if (neighbourFace != nullptr && (front->GetDistance() + 1) < neighbourFace->GetDistance())
+                neighbourVertex = start;
+            }
+            if (neighbourVertex != nullptr && ((front->GetDistance() + 1) < neighbourVertex->GetDistance()))
 			{
-				neighbourFace->SetDistance(front->GetDistance() + 1);
-				neighbourFace->SetPrevious(front);
-				if (neighbourFace == B)
+                neighbourVertex->SetDistance(front->GetDistance() + 1);
+                neighbourVertex->SetPrevious(front);
+                if (neighbourVertex == B)
 				{
 					crawlFlag = false;
 				}
 				else
 				{
-					crawlQueue.push(neighbourFace);
+                    crawlQueue.push(neighbourVertex);
 				}
 			}
 		}
 	}
 	
-	auto presentFace = B;
-	while (presentFace!=nullptr)
+    auto presentVertex = B;
+    while (presentVertex!=A)
 	{
-		distanceVector.push_back(presentFace);
-		presentFace = presentFace->GetPrevious();
+        distanceVector.push_back(presentVertex);
+        presentVertex = presentVertex->GetPrevious();
 	}
 	//RESETING DISTANCE
-	for (auto it = faceList.begin(); it != faceList.end(); ++it)
+    for (auto it = vertexList.begin(); it != vertexList.end(); ++it)
 	{
-		(*it)->SetDistance(99999999999);
+        (*it)->SetDistance(SIZE_MAX);
 	}
-
 	return distanceVector;
 }
