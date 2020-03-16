@@ -47,7 +47,7 @@ int main()
     auto connectingVertex = triMesh.Distance(1,3);
 
 	std::cout << "-------------------------------------------------" << std::endl;
-    std::cout << "    Distance between 1st and 3rd face " << std::endl
+    std::cout << "    Distance between 1st and 3rd vertex " << std::endl
         << "    (in terms of graph edge) is " << connectingVertex.size() << std::endl;
 	std::cout << "-------------------------------------------------" << std::endl;
 
