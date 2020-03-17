@@ -69,8 +69,7 @@ cg::tri_face::tri_face(vertex* A, vertex* B, vertex* C, const size_t& id_ = 0)
 	auto rhs = (A->GetYCoord() - C->GetYCoord()) / (A->GetXCoord() - C->GetXCoord());
 	if (fabs(lhs - rhs) < 1e-12)
 	{
-		std::cout << "The points of the triangles are colinear! Aborting..." << std::endl;
-        exit(EXIT_FAILURE);
+		std::cout << "Warning:The points of the triangles are colinear!" << std::endl;
 	}
 
 	//	FIRST WE CREATE THREE EDGE / CHECK EXISTANCE
